@@ -20,27 +20,50 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for better styling - Fixed for visibility
+# Custom CSS for better styling - Optimized for dark theme
 st.markdown("""
 <style>
-    /* Force dark text on metric cards */
+    /* Force metric containers to have good contrast */
     [data-testid="metric-container"] {
-        background-color: rgba(248, 249, 250, 0.8);
+        background-color: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         padding: 15px;
         border-radius: 10px;
-        border: 1px solid rgba(0, 0, 0, 0.1);
     }
     
-    [data-testid="metric-container"] label {
-        color: #666666 !important;
+    /* Light text for dark theme */
+    .stApp [data-testid="stHeader"] {
+        background-color: transparent;
     }
     
-    [data-testid="metric-container"] [data-testid="stMetricValue"] {
-        color: #2c3e50 !important;
+    .stApp h1, .stApp h2, .stApp h3 {
+        color: #ffffff !important;
     }
     
-    [data-testid="metric-container"] [data-testid="stMetricDelta"] {
-        color: inherit !important;
+    .stApp .stMarkdown {
+        color: #e0e0e0 !important;
+    }
+    
+    [data-testid="stMetricLabel"] {
+        color: #b0b0b0 !important;
+    }
+    
+    [data-testid="stMetricValue"] {
+        color: #ffffff !important;
+    }
+    
+    /* Tab text visibility */
+    .stTabs [data-baseweb="tab-list"] {
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        color: #e0e0e0 !important;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background-color: rgba(255, 255, 255, 0.1) !important;
     }
     
     /* Health score styles */
@@ -48,24 +71,55 @@ st.markdown("""
     .health-score-warning { background-color: #ffbb33; }
     .health-score-critical { background-color: #ff4444; }
     
-    /* Recommendation box */
+    /* Recommendation box with light text */
     .recommendation-box {
-        background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+        background: linear-gradient(135deg, rgba(243, 229, 245, 0.1) 0%, rgba(225, 190, 231, 0.1) 100%);
         padding: 20px;
         border-radius: 10px;
-        border: 1px solid #ce93d8;
+        border: 1px solid rgba(206, 147, 216, 0.3);
         margin: 10px 0;
-        color: #4a148c !important;
+        color: #ffffff !important;
     }
     
-    /* Fix for dark theme issues */
-    .stApp {
-        color: #2c3e50;
+    .recommendation-box h3, .recommendation-box h4 {
+        color: #e1bee7 !important;
     }
     
-    /* Ensure all text in main area is visible */
-    .main .block-container {
-        color: #2c3e50;
+    .recommendation-box li {
+        color: #f3e5f5 !important;
+    }
+    
+    /* Expander content */
+    .streamlit-expanderHeader {
+        color: #e0e0e0 !important;
+    }
+    
+    /* Ensure caption text is visible */
+    .stCaption {
+        color: #b0b0b0 !important;
+    }
+    
+    /* Button styling for dark theme */
+    .stButton > button {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .stButton > button:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    /* Selectbox styling */
+    .stSelectbox label {
+        color: #e0e0e0 !important;
+    }
+    
+    /* Info/Warning/Success boxes */
+    .stAlert {
+        background-color: rgba(255, 255, 255, 0.05);
+        color: #ffffff;
     }
 </style>
 """, unsafe_allow_html=True)
