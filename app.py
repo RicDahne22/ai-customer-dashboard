@@ -425,11 +425,6 @@ def main():
             /* ... */
         </style>
         """, unsafe_allow_html=True)
-    
-    # Header - THIS STAYS THE SAME
-    col1, col2, col3 = st.columns([2, 1, 1])
-    with col1:
-        st.title("🚀 AI-Powered Customer Snapshot Dashboard")
      
     # Header
     col1, col2, col3 = st.columns([2, 1, 1])
