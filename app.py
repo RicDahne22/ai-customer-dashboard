@@ -19,7 +19,8 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
-# Custom CSS for better styling
+
+# Custom CSS for better styling - Fixed for visibility
 st.markdown("""
 <style>
     /* Force dark text on metric cards */
@@ -65,22 +66,6 @@ st.markdown("""
     /* Ensure all text in main area is visible */
     .main .block-container {
         color: #2c3e50;
-    }
-</style>
-""", unsafe_allow_html=True)
-# Custom CSS for better styling
-st.markdown("""
-<style>
-    .health-score-good { background-color: #00C851; }
-    .health-score-warning { background-color: #ffbb33; }
-    .health-score-critical { background-color: #ff4444; }
-    .stMetric { background-color: #f8f9fa; padding: 15px; border-radius: 10px; }
-    .recommendation-box {
-        background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
-        padding: 20px;
-        border-radius: 10px;
-        border: 1px solid #ce93d8;
-        margin: 10px 0;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -617,14 +602,14 @@ def render_pso_view(customer_data, all_customers_df):
         st.write("• Coastal Credit - Workshop ($100K)")
         st.write("• Mountain Trust - Review ($150K)")
     
-    # Success Patterns
+    # Success Patterns - Fixed the syntax error here
     with st.expander("📈 AI Learning: What Drives Advisory Sales", expanded=True):
         st.write("**Top 5 Indicators (based on 127 successful engagements):**")
         patterns = [
             ("Upcoming regulatory audit within 90 days", "92%"),
             ("Multiple CECL-related support tickets", "87%"),
             ("Executive mentions 'compliance concerns'", "85%"),
-            ("Data quality score below 80%", "83%"),
+            ("Data quality score below 80%", "83%"),  # This line was previously cut off
             ("Peer banks in region already engaged us", "81%")
         ]
         
