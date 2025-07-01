@@ -19,7 +19,55 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
-
+# Custom CSS for better styling
+st.markdown("""
+<style>
+    /* Force dark text on metric cards */
+    [data-testid="metric-container"] {
+        background-color: rgba(248, 249, 250, 0.8);
+        padding: 15px;
+        border-radius: 10px;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    [data-testid="metric-container"] label {
+        color: #666666 !important;
+    }
+    
+    [data-testid="metric-container"] [data-testid="stMetricValue"] {
+        color: #2c3e50 !important;
+    }
+    
+    [data-testid="metric-container"] [data-testid="stMetricDelta"] {
+        color: inherit !important;
+    }
+    
+    /* Health score styles */
+    .health-score-good { background-color: #00C851; }
+    .health-score-warning { background-color: #ffbb33; }
+    .health-score-critical { background-color: #ff4444; }
+    
+    /* Recommendation box */
+    .recommendation-box {
+        background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+        padding: 20px;
+        border-radius: 10px;
+        border: 1px solid #ce93d8;
+        margin: 10px 0;
+        color: #4a148c !important;
+    }
+    
+    /* Fix for dark theme issues */
+    .stApp {
+        color: #2c3e50;
+    }
+    
+    /* Ensure all text in main area is visible */
+    .main .block-container {
+        color: #2c3e50;
+    }
+</style>
+""", unsafe_allow_html=True)
 # Custom CSS for better styling
 st.markdown("""
 <style>
