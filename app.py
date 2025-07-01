@@ -360,6 +360,77 @@ def main():
     # Load data
     customers_df = generate_customer_data()
     
+# ADD THEME TOGGLE HERE - Right at the beginning of main()
+    theme = st.sidebar.selectbox(
+        "🎨 Theme",
+        ["Dark", "Light"],
+        index=0  # Default to Dark
+    )
+    
+    # Apply theme-specific CSS
+    if theme == "Light":
+        st.markdown("""
+        <style>
+            /* Light theme overrides */
+            .stApp {
+                background-color: #ffffff;
+                color: #000000;
+            }
+            
+            .stApp h1, .stApp h2, .stApp h3 {
+                color: #1f2937 !important;
+            }
+            
+            .stApp .stMarkdown {
+                color: #374151 !important;
+            }
+            
+            [data-testid="stMetricLabel"] {
+                color: #6b7280 !important;
+            }
+            
+            [data-testid="stMetricValue"] {
+                color: #1f2937 !important;
+            }
+            
+            [data-testid="metric-container"] {
+                background-color: #f9fafb;
+                border: 1px solid #e5e7eb;
+            }
+            
+            .stSidebar {
+                background-color: #f3f4f6;
+                color: #1f2937;
+            }
+            
+            .recommendation-box {
+                background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+                color: #4a148c !important;
+            }
+            
+            .recommendation-box h3, .recommendation-box h4 {
+                color: #6a1b9a !important;
+            }
+            
+            .recommendation-box li {
+                color: #4a148c !important;
+            }
+        </style>
+        """, unsafe_allow_html=True)
+    else:
+        # Dark theme CSS (the one we just created)
+        st.markdown("""
+        <style>
+            /* Your dark theme CSS here - the one from my previous message */
+            /* ... */
+        </style>
+        """, unsafe_allow_html=True)
+    
+    # Header - THIS STAYS THE SAME
+    col1, col2, col3 = st.columns([2, 1, 1])
+    with col1:
+        st.title("🚀 AI-Powered Customer Snapshot Dashboard")
+     
     # Header
     col1, col2, col3 = st.columns([2, 1, 1])
     with col1:
