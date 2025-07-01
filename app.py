@@ -347,9 +347,9 @@ def render_health_score_gauge(score):
         mode = "gauge+number",
         value = score,
         domain = {'x': [0, 1], 'y': [0, 1]},
-        title = {'text': "Health Score", 'font': {'color': 'inherit'}},
+        title = {'text': "Health Score"},
         gauge = {
-            'axis': {'range': [None, 100], 'tickcolor': 'inherit'},
+            'axis': {'range': [None, 100]},
             'bar': {'color': color},
             'steps': [
                 {'range': [0, 60], 'color': "rgba(255, 68, 68, 0.2)"},
@@ -361,16 +361,14 @@ def render_health_score_gauge(score):
                 'thickness': 0.75,
                 'value': 60
             }
-        },
-        number={'font': {'color': 'inherit'}}
+        }
     ))
     
     fig.update_layout(
         height=250, 
         margin=dict(l=20, r=20, t=40, b=20),
         paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        font={'color': 'inherit'}
+        plot_bgcolor='rgba(0,0,0,0)'
     )
     return fig
 
