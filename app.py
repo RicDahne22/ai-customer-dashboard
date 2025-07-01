@@ -20,27 +20,20 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for better styling
+# Custom CSS for better styling - handles both light and dark themes
 st.markdown("""
 <style>
-    /* Force dark text on metric cards */
+    /* Theme-aware metric cards */
     [data-testid="metric-container"] {
-        background-color: rgba(248, 249, 250, 0.8);
+        background-color: rgba(128, 128, 128, 0.1);
         padding: 15px;
         border-radius: 10px;
-        border: 1px solid rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(128, 128, 128, 0.2);
     }
     
+    /* Remove forced colors - let Streamlit handle theme colors */
     [data-testid="metric-container"] label {
-        color: #666666 !important;
-    }
-    
-    [data-testid="metric-container"] [data-testid="stMetricValue"] {
-        color: #2c3e50 !important;
-    }
-    
-    [data-testid="metric-container"] [data-testid="stMetricDelta"] {
-        color: inherit !important;
+        opacity: 0.8;
     }
     
     /* Health score styles */
@@ -48,19 +41,18 @@ st.markdown("""
     .health-score-warning { background-color: #ffbb33; }
     .health-score-critical { background-color: #ff4444; }
     
-    /* Recommendation box */
+    /* Recommendation box with better contrast */
     .recommendation-box {
-        background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+        background: linear-gradient(135deg, rgba(148, 0, 211, 0.1) 0%, rgba(148, 0, 211, 0.2) 100%);
         padding: 20px;
         border-radius: 10px;
-        border: 1px solid #ce93d8;
+        border: 1px solid rgba(148, 0, 211, 0.3);
         margin: 10px 0;
-        color: #4a148c !important;
     }
     
-    /* Alert boxes */
+    /* Alert boxes with better contrast */
     .alert-box {
-        background: #fff3cd;
+        background: rgba(255, 193, 7, 0.1);
         border-left: 4px solid #ffc107;
         padding: 16px;
         margin-bottom: 12px;
@@ -68,34 +60,34 @@ st.markdown("""
     }
     
     .alert-box.critical {
-        background: #f8d7da;
+        background: rgba(220, 53, 69, 0.1);
         border-left-color: #dc3545;
     }
     
     .pattern-alert {
-        background: linear-gradient(135deg, #fff3e0, #ffe0b2);
-        border: 1px solid #ff9800;
+        background: linear-gradient(135deg, rgba(255, 152, 0, 0.1), rgba(255, 152, 0, 0.2));
+        border: 1px solid rgba(255, 152, 0, 0.4);
         border-radius: 12px;
         padding: 20px;
         margin-bottom: 20px;
     }
     
     .opportunity-highlight {
-        background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
-        border: 1px solid #4caf50;
+        background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(76, 175, 80, 0.2));
+        border: 1px solid rgba(76, 175, 80, 0.4);
         border-radius: 12px;
         padding: 20px;
         margin-bottom: 20px;
     }
     
-    /* Fix for dark theme issues */
-    .stApp {
-        color: #2c3e50;
+    /* Remove any forced text colors */
+    .stMarkdown, .stText {
+        color: inherit;
     }
     
-    /* Ensure all text in main area is visible */
-    .main .block-container {
-        color: #2c3e50;
+    /* Ensure plotly charts work in both themes */
+    .js-plotly-plot {
+        background-color: transparent !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -355,24 +347,31 @@ def render_health_score_gauge(score):
         mode = "gauge+number",
         value = score,
         domain = {'x': [0, 1], 'y': [0, 1]},
-        title = {'text': "Health Score"},
+        title = {'text': "Health Score", 'font': {'color': 'inherit'}},
         gauge = {
-            'axis': {'range': [None, 100]},
+            'axis': {'range': [None, 100], 'tickcolor': 'inherit'},
             'bar': {'color': color},
             'steps': [
-                {'range': [0, 60], 'color': "#ffebee"},
-                {'range': [60, 80], 'color': "#fff3e0"},
-                {'range': [80, 100], 'color': "#e8f5e9"}
+                {'range': [0, 60], 'color': "rgba(255, 68, 68, 0.2)"},
+                {'range': [60, 80], 'color': "rgba(255, 187, 51, 0.2)"},
+                {'range': [80, 100], 'color': "rgba(0, 200, 81, 0.2)"}
             ],
             'threshold': {
                 'line': {'color': "red", 'width': 4},
                 'thickness': 0.75,
                 'value': 60
             }
-        }
+        },
+        number={'font': {'color': 'inherit'}}
     ))
     
-    fig.update_layout(height=250, margin=dict(l=20, r=20, t=40, b=20))
+    fig.update_layout(
+        height=250, 
+        margin=dict(l=20, r=20, t=40, b=20),
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font={'color': 'inherit'}
+    )
     return fig
 
 # Main App
@@ -504,10 +503,7 @@ def render_csm_view(customer_data, tickets_df):
             • Next credit pull scheduled in 5 days - match rate trending down (89%)
             """)
             
-            st.markdown('<div class="recommendation-box">', unsafe_allow_html=True)
-            st.markdown("✨ **AI Recommendation**")
-            st.markdown("Lead with empathy about audit pressure. Present concrete resolution timeline for CECL tickets. Offer executive escalation path with dedicated resources. Consider bringing PS team lead to demonstrate commitment. Have specific dates for all deliverables ready.")
-            st.markdown('</div>', unsafe_allow_html=True)
+            st.info("✨ **AI Recommendation**\n\nLead with empathy about audit pressure. Present concrete resolution timeline for CECL tickets. Offer executive escalation path with dedicated resources. Consider bringing PS team lead to demonstrate commitment. Have specific dates for all deliverables ready.")
         
         # Support Tickets
         st.markdown("### 🎫 Support Tickets")
@@ -576,12 +572,11 @@ def render_dse_view(customer_data, tickets_df, customers_df):
     
     # Critical Pattern Alert
     if customer_data['name'] == 'First National Bank of Springfield':
-        st.markdown('<div class="pattern-alert">', unsafe_allow_html=True)
-        st.markdown("### ⚠️ Critical Pattern Detected Across Multiple Customers")
-        st.markdown("**47 banks will experience the same CECL calculation error** that First National Bank is facing if not addressed proactively.")
-        if st.button("Deploy Bulk Fix to 47 Banks", type="primary"):
-            st.success("Bulk fix deployed successfully! 47 banks protected from CECL calculation errors.")
-        st.markdown('</div>', unsafe_allow_html=True)
+        with st.container():
+            st.warning("### ⚠️ Critical Pattern Detected Across Multiple Customers")
+            st.markdown("**47 banks will experience the same CECL calculation error** that First National Bank is facing if not addressed proactively.")
+            if st.button("Deploy Bulk Fix to 47 Banks", type="primary"):
+                st.success("Bulk fix deployed successfully! 47 banks protected from CECL calculation errors.")
     
     # Main dashboard grid
     col1, col2 = st.columns([2, 1])
@@ -658,13 +653,12 @@ def render_pso_view(customer_data, customers_df):
     
     # Opportunity Highlight
     if customer_data['expansion_probability'] > 0.7:
-        st.markdown('<div class="opportunity-highlight">', unsafe_allow_html=True)
-        st.markdown(f"### 💰 {customer_data['name']} - High-Value Opportunity Detected")
-        st.markdown(f"# ${customer_data['opportunity_value']:,.0f}")
-        st.markdown(f"{customer_data['opportunity_type']} - **{customer_data['expansion_probability']*100:.0f}% close probability** based on current risk factors")
-        if st.button("Generate Proposal", type="primary"):
-            st.success("Proposal generated and sent to sales team!")
-        st.markdown('</div>', unsafe_allow_html=True)
+        with st.container():
+            st.success(f"### 💰 {customer_data['name']} - High-Value Opportunity Detected")
+            st.markdown(f"# ${customer_data['opportunity_value']:,.0f}")
+            st.markdown(f"{customer_data['opportunity_type']} - **{customer_data['expansion_probability']*100:.0f}% close probability** based on current risk factors")
+            if st.button("Generate Proposal", type="primary"):
+                st.success("Proposal generated and sent to sales team!")
     
     # Main dashboard grid
     col1, col2 = st.columns([2, 1])
@@ -730,17 +724,8 @@ def render_pso_view(customer_data, customers_df):
     
     # Success Pattern Analysis
     st.markdown("### 📈 Success Pattern Analysis")
-    st.markdown('<div class="recommendation-box">', unsafe_allow_html=True)
-    st.markdown("✨ **AI Learning: What Drives Advisory Sales**")
-    st.markdown("""
-    **Top 5 Indicators (based on 127 successful engagements):**
-    1. Upcoming regulatory audit within 90 days (92% close rate)
-    2. Multiple CECL-related support tickets (87% close rate)
-    3. Executive mentions "compliance concerns" (85% close rate)
-    4. Data quality score below 80% (83% close rate)
-    5. Peer banks in region already engaged us (81% close rate)
-    """)
-    st.markdown('</div>', unsafe_allow_html=True)
+    with st.container():
+        st.info("✨ **AI Learning: What Drives Advisory Sales**\n\n**Top 5 Indicators (based on 127 successful engagements):**\n1. Upcoming regulatory audit within 90 days (92% close rate)\n2. Multiple CECL-related support tickets (87% close rate)\n3. Executive mentions \"compliance concerns\" (85% close rate)\n4. Data quality score below 80% (83% close rate)\n5. Peer banks in region already engaged us (81% close rate)")
     
     # AI Recommendations
     recommendations = generate_ai_recommendations(customer_data, 'PSO')
@@ -757,17 +742,16 @@ def render_credit_view(customer_data, customers_df):
     
     # Critical Alert Banner
     if customer_data['bureau_match_rate'] < 70:
-        st.markdown('<div class="pattern-alert">', unsafe_allow_html=True)
-        st.markdown(f"### 🚨 Bureau Submission Alert: {customer_data['name']}")
-        st.markdown(f"**Next submission scheduled in {customer_data['last_bureau_submission']}** with predicted {customer_data['bureau_match_rate']:.0f}% bureau match rate (target: 95%). Database validation recommended to avoid ${customer_data['bureau_cost']*0.3:,.0f} in bureau rejection fees.")
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("Run Database Validation", type="primary"):
-                st.success("Database validation completed! Issues identified and ready for fixing.")
-        with col2:
-            if st.button("Fix Data Issues", type="primary"):
-                st.success("Data issues fixed! Bureau match rate improved to 94%")
-        st.markdown('</div>', unsafe_allow_html=True)
+        with st.container():
+            st.error(f"### 🚨 Bureau Submission Alert: {customer_data['name']}")
+            st.markdown(f"**Next submission scheduled in {customer_data['last_bureau_submission']}** with predicted {customer_data['bureau_match_rate']:.0f}% bureau match rate (target: 95%). Database validation recommended to avoid ${customer_data['bureau_cost']*0.3:,.0f} in bureau rejection fees.")
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("Run Database Validation", type="primary"):
+                    st.success("Database validation completed! Issues identified and ready for fixing.")
+            with col2:
+                if st.button("Fix Data Issues", type="primary"):
+                    st.success("Data issues fixed! Bureau match rate improved to 94%")
     
     # Today's Bureau Submissions
     col1, col2 = st.columns([2, 1])
@@ -851,15 +835,8 @@ def render_credit_view(customer_data, customers_df):
     
     with col1:
         st.markdown("### 🤖 AI Database Optimization")
-        st.markdown('<div class="recommendation-box">', unsafe_allow_html=True)
-        st.markdown("✨ **Pre-Submission Database Improvements**")
-        st.markdown("""
-        1. **SSN Standardization:** Auto-format 10,889 SSNs to XXX-XX-XXXX format (+18% bureau acceptance)
-        2. **Address USPS Validation:** Standardize 8,123 addresses before bureau submission (+12% improvement)
-        3. **Name Field Cleanup:** Remove special characters, standardize case (+8% improvement)
-        4. **Database Query Optimization:** Pre-validate fields during extraction (+25% faster processing)
-        """)
-        st.markdown('</div>', unsafe_allow_html=True)
+        with st.container():
+            st.info("✨ **Pre-Submission Database Improvements**\n\n1. **SSN Standardization:** Auto-format 10,889 SSNs to XXX-XX-XXXX format (+18% bureau acceptance)\n2. **Address USPS Validation:** Standardize 8,123 addresses before bureau submission (+12% improvement)\n3. **Name Field Cleanup:** Remove special characters, standardize case (+8% improvement)\n4. **Database Query Optimization:** Pre-validate fields during extraction (+25% faster processing)")
     
     with col2:
         st.markdown("### 💰 Bureau Cost Savings")
