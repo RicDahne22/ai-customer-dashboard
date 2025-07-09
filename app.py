@@ -1,3 +1,4 @@
+
 # AI-Powered Customer Snapshot Dashboard POC - Updated Version
 # Save this as app.py and run with: streamlit run app.py
 
@@ -23,61 +24,59 @@ st.set_page_config(
 # Custom CSS for better styling - handles both light and dark themes
 st.markdown("""
 <style>
-    /* Theme-aware metric cards */
+    /* Theme-aware styles that work in both light and dark modes */
+    
+    /* Metric containers with better theme support */
     [data-testid="metric-container"] {
-        background-color: rgba(128, 128, 128, 0.1);
+        background-color: rgba(128, 128, 128, 0.08);
         padding: 15px;
         border-radius: 10px;
-        border: 1px solid rgba(128, 128, 128, 0.2);
+        border: 1px solid rgba(128, 128, 128, 0.15);
+        transition: all 0.3s ease;
+    }
+    
+    [data-testid="metric-container"]:hover {
+        background-color: rgba(128, 128, 128, 0.12);
+        border-color: rgba(128, 128, 128, 0.25);
     }
     
     /* Remove forced colors - let Streamlit handle theme colors */
     [data-testid="metric-container"] label {
-        opacity: 0.8;
+        opacity: 0.7;
     }
     
-    /* Health score styles */
-    .health-score-good { background-color: #00C851; }
-    .health-score-warning { background-color: #ffbb33; }
-    .health-score-critical { background-color: #ff4444; }
-    
-    /* Recommendation box with better contrast */
-    .recommendation-box {
-        background: linear-gradient(135deg, rgba(148, 0, 211, 0.1) 0%, rgba(148, 0, 211, 0.2) 100%);
-        padding: 20px;
-        border-radius: 10px;
-        border: 1px solid rgba(148, 0, 211, 0.3);
-        margin: 10px 0;
+    [data-testid="metric-container"] [data-testid="stMetricValue"] {
+        font-weight: 600;
     }
     
-    /* Alert boxes with better contrast */
-    .alert-box {
-        background: rgba(255, 193, 7, 0.1);
-        border-left: 4px solid #ffc107;
-        padding: 16px;
-        margin-bottom: 12px;
-        border-radius: 8px;
+    /* Custom containers with semi-transparent backgrounds */
+    .custom-container {
+        background: rgba(128, 128, 128, 0.05);
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        margin: 1rem 0;
     }
     
-    .alert-box.critical {
-        background: rgba(220, 53, 69, 0.1);
-        border-left-color: #dc3545;
+    /* Success/Warning/Error styles using transparency */
+    .success-container {
+        background: rgba(76, 175, 80, 0.1);
+        border: 1px solid rgba(76, 175, 80, 0.3);
+        border-radius: 0.5rem;
+        padding: 1rem;
     }
     
-    .pattern-alert {
-        background: linear-gradient(135deg, rgba(255, 152, 0, 0.1), rgba(255, 152, 0, 0.2));
-        border: 1px solid rgba(255, 152, 0, 0.4);
-        border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 20px;
+    .warning-container {
+        background: rgba(255, 152, 0, 0.1);
+        border: 1px solid rgba(255, 152, 0, 0.3);
+        border-radius: 0.5rem;
+        padding: 1rem;
     }
     
-    .opportunity-highlight {
-        background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(76, 175, 80, 0.2));
-        border: 1px solid rgba(76, 175, 80, 0.4);
-        border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 20px;
+    .error-container {
+        background: rgba(244, 67, 54, 0.1);
+        border: 1px solid rgba(244, 67, 54, 0.3);
+        border-radius: 0.5rem;
+        padding: 1rem;
     }
     
     /* Remove any forced text colors */
@@ -85,9 +84,41 @@ st.markdown("""
         color: inherit;
     }
     
+    /* Better button styling for both themes */
+    .stButton > button {
+        transition: all 0.3s ease;
+    }
+    
+    .stButton > button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+    
     /* Ensure plotly charts work in both themes */
     .js-plotly-plot {
         background-color: transparent !important;
+    }
+    
+    /* Better expander styling */
+    .streamlit-expanderHeader {
+        background-color: rgba(128, 128, 128, 0.05);
+        border-radius: 0.5rem;
+    }
+    
+    /* Table styling improvements */
+    .stDataFrame {
+        background-color: rgba(128, 128, 128, 0.02);
+    }
+    
+    /* Sidebar improvements */
+    section[data-testid="stSidebar"] {
+        background-color: rgba(128, 128, 128, 0.03);
+    }
+    
+    /* Input field styling */
+    .stTextInput > div > div > input,
+    .stSelectbox > div > div > select {
+        background-color: rgba(128, 128, 128, 0.05);
     }
 </style>
 """, unsafe_allow_html=True)
