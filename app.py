@@ -1,4 +1,3 @@
-
 # AI-Powered Customer Snapshot Dashboard POC - Updated Version
 # Save this as app.py and run with: streamlit run app.py
 
@@ -129,32 +128,133 @@ if 'selected_customer' not in st.session_state:
 if 'view_mode' not in st.session_state:
     st.session_state.view_mode = 'CSM'
 
-# Sample data generation
+# Sample data generation with realistic patterns
 @st.cache_data
 def generate_customer_data():
-    """Generate sample customer data for 1,008 customers"""
+    """Generate realistic synthetic customer data for 1,008 customers"""
     np.random.seed(42)
     
+    # Realistic bank name components based on common patterns
+    prefixes = ['First', 'Community', 'Regional', 'Citizens', 'Heritage', 'Liberty', 'Union', 'Pioneer', 
+                'Founders', 'Summit', 'Valley', 'Coastal', 'Mountain', 'Prairie', 'River', 'Lake',
+                'Central', 'National', 'State', 'Federal', 'American', 'United', 'Trust', 'Mutual']
+    
+    locations = ['Springfield', 'Riverside', 'Oakville', 'Maplewood', 'Pinehurst', 'Fairview', 
+                 'Greenfield', 'Brookside', 'Hillcrest', 'Lakewood', 'Westfield', 'Eastgate',
+                 'Northpoint', 'Southbridge', 'Midtown', 'Downtown', 'Uptown', 'Crossroads',
+                 'Grandview', 'Pleasant Valley', 'Crystal Lake', 'Stone Mountain', 'Gold Coast',
+                 'Silver Springs', 'Copper Hills', 'Iron Ridge', 'Diamond Valley', 'Pearl Harbor']
+    
+    suffixes = ['Bank', 'Credit Union', 'Financial', 'Trust', 'Savings', 'Bank & Trust', 
+                'Federal Credit Union', 'Community Bank', 'Savings Bank', 'Trust Company']
+    
+    states = ['CA', 'TX', 'FL', 'NY', 'PA', 'IL', 'OH', 'GA', 'NC', 'MI', 'NJ', 'VA', 
+              'WA', 'AZ', 'MA', 'TN', 'IN', 'MO', 'MD', 'WI', 'CO', 'MN', 'SC', 'AL',
+              'LA', 'KY', 'OR', 'OK', 'CT', 'UT', 'IA', 'NV', 'AR', 'MS', 'KS', 'NM',
+              'NE', 'WV', 'ID', 'HI', 'NH', 'ME', 'MT', 'RI', 'DE', 'SD', 'ND', 'AK', 'VT', 'WY']
+    
+    # CSM distribution based on real data
+    csms = ['Eric Dahn'] * 265 + ['Austin Rayfield'] * 237 + ['Bryan Burton'] * 230 + ['Melissa Stark'] * 218
+    remaining = 1008 - len(csms)
+    csms.extend(['Other CSM'] * remaining)
+    np.random.shuffle(csms)
+    
+    # Territory mapping
+    territory_map = {
+        'Eric Dahn': ['CA', 'TX', 'NM', 'AZ', 'OK', 'NV', 'KS', 'MO', 'IA', 'HI'],
+        'Bryan Burton': ['MI', 'OH', 'PA', 'NY', 'NJ', 'CT', 'MA', 'VT', 'NH', 'ME', 'RI', 'MD', 'DE'],
+        'Austin Rayfield': ['FL', 'GA', 'NC', 'SC', 'TN', 'AL', 'MS', 'LA', 'AR', 'KY', 'VA', 'WV'],
+        'Melissa Stark': ['WA', 'OR', 'ID', 'MT', 'WY', 'CO', 'UT', 'NV', 'ND', 'SD', 'NE', 'MN', 'WI', 'IL', 'IN']
+    }
+    
+    # Health score distribution (1-5 scale, matching real data)
+    # Real distribution shows most are healthy (4-5), some at risk (2-3), few critical (1)
+    health_weights = [0.03, 0.05, 0.10, 0.35, 0.47]  # for scores 1-5
+    
     customers = []
+    used_names = set()
+    
     for i in range(1008):
-        # Generate base metrics
-        health_score = np.random.normal(75, 15)
-        health_score = max(0, min(100, health_score))
+        # Generate unique bank name
+        while True:
+            if i == 0:
+                # Keep our demo customer
+                name = 'First National Bank of Springfield'
+                state = 'MO'
+                break
+            else:
+                prefix = np.random.choice(prefixes)
+                location = np.random.choice(locations)
+                suffix = np.random.choice(suffixes)
+                name = f"{prefix} {location} {suffix}"
+                
+                # Ensure uniqueness
+                if name not in used_names:
+                    used_names.add(name)
+                    # Assign state based on CSM territory
+                    csm = csms[i]
+                    if csm in territory_map:
+                        state = np.random.choice(territory_map[csm])
+                    else:
+                        state = np.random.choice(states)
+                    break
         
-        # Special case for First National Bank
+        # Generate health score with realistic distribution
+        health_score = np.random.choice([1, 2, 3, 4, 5], p=health_weights)
+        
+        # Convert to 0-100 scale for display
+        health_score_display = {1: 20, 2: 40, 3: 60, 4: 80, 5: 95}[health_score]
+        
+        # Realistic correlation - poor health = more tickets, higher churn risk
+        if health_score == 1:
+            ticket_avg = 150
+            churn_risk = 0.75
+            expansion_prob = 0.05
+        elif health_score == 2:
+            ticket_avg = 80
+            churn_risk = 0.45
+            expansion_prob = 0.15
+        elif health_score == 3:
+            ticket_avg = 40
+            churn_risk = 0.25
+            expansion_prob = 0.35
+        elif health_score == 4:
+            ticket_avg = 20
+            churn_risk = 0.10
+            expansion_prob = 0.55
+        else:  # health_score == 5
+            ticket_avg = 8
+            churn_risk = 0.02
+            expansion_prob = 0.75
+        
+        # Add realistic variance
+        support_tickets = max(0, int(np.random.normal(ticket_avg, ticket_avg * 0.3)))
+        
+        # Critical tickets correlate with poor health
+        critical_tickets = 0
+        if health_score <= 2:
+            critical_tickets = np.random.binomial(min(5, support_tickets), 0.3)
+        elif health_score == 3:
+            critical_tickets = np.random.binomial(min(3, support_tickets), 0.1)
+        
+        # Special case for First National Bank (our demo)
         if i == 0:
             customer = {
-                'name': 'First National Bank of Springfield',
+                'name': name,
+                'state': state,
                 'tier': 'Tier 1',
-                'csm': 'Sarah Johnson',
+                'csm': 'Bryan Burton',
                 'customer_since': 'Jan 2021',
                 'health_score': 82,
+                'health_score_raw': 4,
                 'churn_risk': 0.15,
                 'expansion_probability': 0.85,
                 'monthly_value': 45000,
+                'annual_revenue': 540000,
                 'cecl_completion': 75,
                 'support_tickets_open': 2,
                 'support_tickets_critical': 2,
+                'support_tickets_ytd': 47,
                 'days_since_contact': 2,
                 'usage_trend': -12,
                 'data_quality_score': 78,
@@ -171,39 +271,101 @@ def generate_customer_data():
                 'opportunity_type': 'CECL Advisory Services Package',
                 'database_records': 45287,
                 'bureau_cost': 4250,
-                'data_issues': 'SSN format (24%), Address missing (18%), Name standardization (12%)'
+                'data_issues': 'SSN format (24%), Address missing (18%), Name standardization (12%)',
+                'health_tagline': 'Struggling with CECL implementation - needs immediate attention'
             }
         else:
-            # Generate random customer
+            # Realistic tier distribution
+            tier = np.random.choice(['Tier 1', 'Tier 2', 'Tier 3'], p=[0.15, 0.45, 0.40])
+            
+            # Revenue based on tier
+            if tier == 'Tier 1':
+                annual_revenue = np.random.uniform(500000, 2000000)
+            elif tier == 'Tier 2':
+                annual_revenue = np.random.uniform(100000, 500000)
+            else:
+                annual_revenue = np.random.uniform(25000, 100000)
+            
+            # Project likelihood based on health and tier
+            ps_project_active = np.random.random() < (0.4 if health_score <= 3 else 0.2)
+            
+            # Realistic health taglines based on score
+            if health_score == 1:
+                taglines = [
+                    'At risk of cancellation - needs executive intervention',
+                    'Severe data quality issues blocking progress',
+                    'No engagement in 90+ days - ghosting risk',
+                    'Multiple escalations - relationship deteriorating',
+                    'Invoice disputes - considering alternatives'
+                ]
+            elif health_score == 2:
+                taglines = [
+                    'Struggling with implementation - needs hands-on support',
+                    'High ticket volume indicating platform challenges',
+                    'Engagement declining - at risk',
+                    'Data quality issues impacting credit pulls',
+                    'Project delays causing frustration'
+                ]
+            elif health_score == 3:
+                taglines = [
+                    'Making progress but needs guidance',
+                    'Stable but not fully utilizing platform',
+                    'Some technical challenges to address',
+                    'Moderate engagement - room for growth',
+                    'Project on track with minor issues'
+                ]
+            elif health_score == 4:
+                taglines = [
+                    'Strong adoption with expansion potential',
+                    'Good platform usage - ready for advanced features',
+                    'Stable and growing relationship',
+                    'Minor support needs only',
+                    'Project successful - exploring next phase'
+                ]
+            else:  # health_score == 5
+                taglines = [
+                    'Power user - potential reference customer',
+                    'Excellent adoption across all modules',
+                    'Strategic partner - innovation opportunities',
+                    'Minimal support needs - self-sufficient',
+                    'Strong advocate - bringing referrals'
+                ]
+            
             customer = {
-                'name': f'Customer Bank {i+1}',
-                'tier': np.random.choice(['Tier 1', 'Tier 2', 'Tier 3'], p=[0.2, 0.5, 0.3]),
-                'csm': np.random.choice(['Sarah Johnson', 'Mike Chen', 'Lisa Brown', 'Tom Wilson']),
+                'name': name,
+                'state': state,
+                'tier': tier,
+                'csm': csms[i],
                 'customer_since': f"{np.random.choice(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])} {np.random.randint(2019, 2024)}",
-                'health_score': health_score,
-                'churn_risk': (100 - health_score) / 100 * np.random.uniform(0.8, 1.2),
-                'expansion_probability': health_score / 100 * np.random.uniform(0.5, 1.0),
-                'monthly_value': np.random.uniform(5000, 75000),
-                'cecl_completion': np.random.uniform(40, 100),
-                'support_tickets_open': np.random.poisson(1),
-                'support_tickets_critical': np.random.binomial(2, 0.1),
-                'days_since_contact': np.random.exponential(15),
-                'usage_trend': np.random.normal(0, 20),
-                'data_quality_score': np.random.uniform(65, 98),
-                'bureau_match_rate': np.random.uniform(60, 98),
+                'health_score': health_score_display,
+                'health_score_raw': health_score,
+                'churn_risk': churn_risk + np.random.uniform(-0.1, 0.1),
+                'expansion_probability': expansion_prob + np.random.uniform(-0.1, 0.1),
+                'monthly_value': annual_revenue / 12,
+                'annual_revenue': annual_revenue,
+                'cecl_completion': np.random.uniform(0, 100) if health_score < 4 else np.random.uniform(60, 100),
+                'support_tickets_open': np.random.binomial(5, 0.3) if support_tickets > 0 else 0,
+                'support_tickets_critical': critical_tickets,
+                'support_tickets_ytd': support_tickets,
+                'days_since_contact': np.random.exponential(15) if health_score >= 3 else np.random.exponential(30),
+                'usage_trend': np.random.normal(0, 20) if health_score >= 3 else np.random.normal(-10, 20),
+                'data_quality_score': np.random.uniform(60, 98) if health_score >= 3 else np.random.uniform(40, 80),
+                'bureau_match_rate': np.random.uniform(85, 98) if health_score >= 4 else np.random.uniform(60, 85),
                 'last_bureau_submission': f"{np.random.randint(1, 30)} days",
-                'missing_fields': np.random.randint(0, 200),
-                'cecl_model_status': f"{np.random.randint(8, 15)}/15 Configured",
-                'ps_project_active': np.random.choice([True, False], p=[0.3, 0.7]),
-                'ps_project_name': np.random.choice(['CECL Advisory', 'Data Quality', 'Implementation', 'Optimization']),
-                'ps_project_completion': np.random.uniform(0, 100),
-                'ps_hours_used': np.random.randint(0, 200),
-                'ps_hours_total': np.random.randint(100, 300),
-                'opportunity_value': np.random.choice([0, 50000, 75000, 100000, 125000, 150000, 200000], p=[0.4, 0.15, 0.15, 0.1, 0.1, 0.05, 0.05]),
-                'opportunity_type': np.random.choice(['CECL Advisory', 'Data Quality Package', 'Full Implementation', 'Optimization Services']),
+                'missing_fields': np.random.randint(0, 50) if health_score >= 4 else np.random.randint(50, 200),
+                'cecl_model_status': f"{np.random.randint(8, 15)}/15 Configured" if health_score >= 3 else f"{np.random.randint(0, 8)}/15 Configured",
+                'ps_project_active': ps_project_active,
+                'ps_project_name': np.random.choice(['CECL Advisory', 'Data Quality Remediation', 'Implementation Services', 'Optimization Engagement']),
+                'ps_project_completion': np.random.uniform(0, 100) if ps_project_active else 0,
+                'ps_hours_used': np.random.randint(0, 200) if ps_project_active else 0,
+                'ps_hours_total': np.random.randint(100, 300) if ps_project_active else 0,
+                'opportunity_value': np.random.choice([0, 50000, 75000, 100000, 125000, 150000, 200000], 
+                                                    p=[0.4, 0.15, 0.15, 0.1, 0.1, 0.05, 0.05]) if expansion_prob > 0.5 else 0,
+                'opportunity_type': np.random.choice(['CECL Advisory', 'Data Quality Package', 'Bureau Optimization', 'Advanced Analytics']),
                 'database_records': np.random.randint(10000, 100000),
                 'bureau_cost': np.random.randint(1000, 6000),
-                'data_issues': 'Various data quality issues'
+                'data_issues': 'Various data quality issues',
+                'health_tagline': np.random.choice(taglines)
             }
         
         # Normalize values
@@ -216,48 +378,133 @@ def generate_customer_data():
 
 @st.cache_data
 def generate_support_tickets(customer_name):
-    """Generate support tickets for a specific customer"""
+    """Generate realistic support tickets for a specific customer"""
     tickets = []
+    
+    # Get customer data to generate appropriate tickets
+    customer = customers_df[customers_df['name'] == customer_name].iloc[0] if customer_name in customers_df['name'].values else None
     
     if customer_name == 'First National Bank of Springfield':
         tickets = [
             {
-                'id': 'T-2024-1823',
+                'id': 'INC-2024-18234',
                 'title': 'CECL calculation discrepancy in PD models',
                 'status': 'Open',
                 'priority': 'Critical',
                 'days_open': 5,
                 'assigned_to': 'Bob Smith (DSE)',
-                'root_cause': 'Incorrect date format in loan origination data'
+                'root_cause': 'Incorrect date format in loan origination data',
+                'category': 'CECL/ALLL'
             },
             {
-                'id': 'T-2024-1847',
+                'id': 'INC-2024-18471',
                 'title': 'Data mapping error in commercial loan portfolio',
                 'status': 'Open',
                 'priority': 'Critical',
                 'days_open': 2,
                 'assigned_to': 'Bob Smith (DSE)',
-                'root_cause': 'Impact: 2,341 loans incorrectly categorized'
+                'root_cause': 'Impact: 2,341 loans incorrectly categorized',
+                'category': 'Data Quality'
             }
         ]
-    else:
-        # Generate random tickets for other customers
-        num_tickets = np.random.poisson(1.5)
-        for i in range(num_tickets):
+    elif customer is not None:
+        # Generate tickets based on customer health
+        health_score = customer['health_score_raw']
+        
+        # Realistic ticket categories based on real data
+        ticket_categories = {
+            'File processing': 0.327,
+            'CECL/ALLL': 0.184,
+            'Data Quality': 0.156,
+            'Credit Reports': 0.098,
+            'User Access': 0.067,
+            'Configuration': 0.054,
+            'Training Request': 0.042,
+            'Integration': 0.038,
+            'Performance': 0.034
+        }
+        
+        # More tickets for unhealthy customers
+        if health_score == 1:
+            num_open_tickets = np.random.poisson(3)
+            num_recent_tickets = np.random.poisson(8)
+        elif health_score == 2:
+            num_open_tickets = np.random.poisson(2)
+            num_recent_tickets = np.random.poisson(5)
+        elif health_score == 3:
+            num_open_tickets = np.random.poisson(1)
+            num_recent_tickets = np.random.poisson(3)
+        else:
+            num_open_tickets = np.random.binomial(2, 0.2)
+            num_recent_tickets = np.random.poisson(1)
+        
+        # Generate realistic ticket titles by category
+        ticket_titles = {
+            'File processing': [
+                'Credit file upload failed - invalid format',
+                'Batch processing stuck at validation',
+                'Large file timeout during processing',
+                'CSV parsing error on row 10,234',
+                'File rejection - missing required columns'
+            ],
+            'CECL/ALLL': [
+                'Q-factor calculation not matching expected results',
+                'PD model convergence issues',
+                'Scenario analysis configuration questions',
+                'Historical loss data import problems',
+                'Forecast period settings clarification needed'
+            ],
+            'Data Quality': [
+                'SSN format validation rejecting valid entries',
+                'Address standardization not working correctly',
+                'Duplicate detection flagging false positives',
+                'Missing data in required fields report',
+                'Data mapping configuration lost after update'
+            ],
+            'Credit Reports': [
+                'Bureau match rate below 80%',
+                'Credit pull timeout errors',
+                'Tradeline data not populating',
+                'Score discrepancies between bureaus',
+                'Bulk credit pull scheduling issues'
+            ],
+            'User Access': [
+                'New user cannot access CECL module',
+                'Password reset not working',
+                'Permission error when running reports',
+                'Admin access needed for configuration',
+                'User deactivation request'
+            ]
+        }
+        
+        # Generate open tickets
+        for i in range(num_open_tickets):
+            category = np.random.choice(list(ticket_categories.keys()), p=list(ticket_categories.values()))
+            priority = 'Critical' if health_score <= 2 and i == 0 else np.random.choice(['Low', 'Medium', 'High', 'Critical'], p=[0.3, 0.4, 0.2, 0.1])
+            
             tickets.append({
-                'id': f'T-2024-{np.random.randint(1000, 9999)}',
-                'title': np.random.choice([
-                    'Data quality issue in loan portfolio',
-                    'CECL model configuration question',
-                    'Credit pull match rate declining',
-                    'User access permissions update',
-                    'Report generation error'
-                ]),
-                'status': np.random.choice(['Open', 'In Progress', 'Resolved'], p=[0.5, 0.3, 0.2]),
-                'priority': np.random.choice(['Low', 'Medium', 'High', 'Critical'], p=[0.3, 0.4, 0.2, 0.1]),
+                'id': f'INC-2024-{np.random.randint(10000, 99999)}',
+                'title': np.random.choice(ticket_titles.get(category, ['General platform inquiry'])),
+                'status': np.random.choice(['Open', 'In Progress'], p=[0.6, 0.4]),
+                'priority': priority,
                 'days_open': np.random.exponential(3),
-                'assigned_to': np.random.choice(['Bob Smith (DSE)', 'Alice Johnson (DSE)', 'Tom Wilson (DSE)']),
-                'root_cause': 'Under investigation'
+                'assigned_to': np.random.choice(['Bob Smith (DSE)', 'Alice Johnson (DSE)', 'Tom Wilson (DSE)', 'Sarah Martinez (DSE)']),
+                'root_cause': 'Under investigation',
+                'category': category
+            })
+        
+        # Add some recently closed tickets for context
+        for i in range(num_recent_tickets):
+            category = np.random.choice(list(ticket_categories.keys()), p=list(ticket_categories.values()))
+            tickets.append({
+                'id': f'INC-2024-{np.random.randint(10000, 99999)}',
+                'title': np.random.choice(ticket_titles.get(category, ['General platform inquiry'])),
+                'status': 'Resolved',
+                'priority': np.random.choice(['Low', 'Medium', 'High'], p=[0.4, 0.4, 0.2]),
+                'days_open': 0,
+                'assigned_to': np.random.choice(['Bob Smith (DSE)', 'Alice Johnson (DSE)', 'Tom Wilson (DSE)', 'Sarah Martinez (DSE)']),
+                'root_cause': 'Resolved',
+                'category': category
             })
     
     return pd.DataFrame(tickets)
@@ -405,7 +652,8 @@ def render_health_score_gauge(score):
 
 # Main App
 def main():
-    # Load data
+    # Load data - make it globally accessible
+    global customers_df
     customers_df = generate_customer_data()
     
     # Header with view mode selection
@@ -435,25 +683,34 @@ def main():
         # Quick filters
         filter_type = st.radio(
             "Quick Filters",
-            ["All Customers", "At Risk", "Opportunities", "My Accounts", "Poor Data Quality"]
+            ["All Customers", "Critical (Score 1)", "At Risk (Score 2-3)", "Healthy (Score 4-5)", "My Accounts", "High Ticket Volume"]
         )
         
-        if filter_type == "At Risk":
-            filtered_df = customers_df[customers_df['health_score'] < 70]
-        elif filter_type == "Opportunities":
-            filtered_df = customers_df[customers_df['expansion_probability'] > 0.7]
+        if filter_type == "Critical (Score 1)":
+            filtered_df = customers_df[customers_df['health_score_raw'] == 1]
+        elif filter_type == "At Risk (Score 2-3)":
+            filtered_df = customers_df[customers_df['health_score_raw'].isin([2, 3])]
+        elif filter_type == "Healthy (Score 4-5)":
+            filtered_df = customers_df[customers_df['health_score_raw'].isin([4, 5])]
         elif filter_type == "My Accounts":
-            # Simulate CSM assignment for Sarah's customers
-            filtered_df = customers_df[customers_df['csm'] == 'Sarah Johnson']
-        elif filter_type == "Poor Data Quality":
-            filtered_df = customers_df[customers_df['data_quality_score'] < 85]
+            # Filter by current view mode CSM
+            if st.session_state.view_mode == 'CSM':
+                filtered_df = customers_df[customers_df['csm'] == 'Bryan Burton']
+            else:
+                filtered_df = customers_df
+        elif filter_type == "High Ticket Volume":
+            filtered_df = customers_df[customers_df['support_tickets_ytd'] > 100]
         else:
             filtered_df = customers_df
         
+        # Sort by health score (worst first) for easier selection
+        filtered_df = filtered_df.sort_values('health_score_raw', ascending=True)
+        
         selected_customer = st.selectbox(
-            "Select Customer",
+            f"Select Customer ({len(filtered_df)} matches)",
             filtered_df['name'].tolist(),
-            index=0 if 'First National Bank of Springfield' in filtered_df['name'].tolist() else 0
+            index=0 if len(filtered_df) > 0 else 0,
+            format_func=lambda x: f"{x} ({filtered_df[filtered_df['name']==x]['state'].iloc[0]})"
         )
         
         st.session_state.selected_customer = selected_customer
@@ -461,17 +718,28 @@ def main():
         # Quick stats
         st.markdown("---")
         st.subheader("Portfolio Overview")
-        at_risk = len(customers_df[customers_df['health_score'] < 70])
-        opportunities = len(customers_df[customers_df['expansion_probability'] > 0.7])
-        poor_data = len(customers_df[customers_df['data_quality_score'] < 85])
+        
+        # Calculate real statistics
+        critical = len(customers_df[customers_df['health_score_raw'] == 1])
+        at_risk = len(customers_df[customers_df['health_score_raw'].isin([2, 3])])
+        healthy = len(customers_df[customers_df['health_score_raw'].isin([4, 5])])
+        high_tickets = len(customers_df[customers_df['support_tickets_ytd'] > 100])
         
         col1, col2 = st.columns(2)
         with col1:
-            st.metric("At Risk", at_risk, f"{at_risk/10.08:.1f}%", delta_color="inverse")
+            st.metric("Critical", critical, f"{critical/10.08:.1f}%", delta_color="inverse")
+            st.metric("High Tickets", high_tickets, ">100 YTD", delta_color="inverse")
         with col2:
-            st.metric("Opportunities", opportunities, f"${opportunities*125}K")
+            st.metric("At Risk", at_risk, f"{at_risk/10.08:.1f}%", delta_color="inverse")
+            st.metric("Healthy", healthy, f"{healthy/10.08:.1f}%")
         
-        st.metric("Poor Data Quality", poor_data, f"{poor_data/10.08:.1f}%", delta_color="inverse")
+        # CSM breakdown
+        st.markdown("---")
+        st.subheader("CSM Breakdown")
+        csm_counts = customers_df['csm'].value_counts()
+        for csm, count in csm_counts.items()[:4]:  # Show top 4 CSMs
+            health_avg = customers_df[customers_df['csm'] == csm]['health_score'].mean()
+            st.markdown(f"**{csm}**: {count} accounts (avg: {health_avg:.0f})")
     
     # Get selected customer data
     customer_data = customers_df[customers_df['name'] == selected_customer].iloc[0]
@@ -490,15 +758,20 @@ def main():
 def render_csm_view(customer_data, tickets_df):
     """Render the CSM view"""
     st.header(f"CSM View - {customer_data['name']}")
-    st.subheader("Unified view of customer health, support, and engagement for Sarah's 237.5 customers")
+    st.subheader(f"Managing {len(customers_df[customers_df['csm'] == customer_data['csm']])} customers in {customer_data['state']}")
     
     # Customer header with health score
     col1, col2, col3, col4 = st.columns([2, 1, 1, 1])
     with col1:
         st.markdown(f"### {customer_data['name']}")
-        st.markdown(f"📍 **{customer_data['tier']} Customer** | 📅 **Since:** {customer_data['customer_since']} | 👤 **CSM:** {customer_data['csm']}")
-        if customer_data['name'] == 'First National Bank of Springfield':
-            st.markdown("📞 **Next Meeting:** Today 2:00 PM")
+        st.markdown(f"📍 **{customer_data['tier']} Customer** | 🌎 **{customer_data['state']}** | 📅 **Since:** {customer_data['customer_since']} | 💰 **ARR:** ${customer_data['annual_revenue']:,.0f}")
+        if customer_data.get('health_tagline'):
+            if customer_data['health_score_raw'] <= 2:
+                st.error(f"⚠️ {customer_data['health_tagline']}")
+            elif customer_data['health_score_raw'] == 3:
+                st.warning(f"📊 {customer_data['health_tagline']}")
+            else:
+                st.success(f"✅ {customer_data['health_tagline']}")
     
     with col2:
         fig = render_health_score_gauge(customer_data['health_score'])
@@ -508,10 +781,14 @@ def render_csm_view(customer_data, tickets_df):
         st.metric("Churn Risk", f"{customer_data['churn_risk']*100:.0f}%", 
                   "High" if customer_data['churn_risk'] > 0.3 else "Low", 
                   delta_color="inverse")
+        st.metric("Support Tickets YTD", customer_data['support_tickets_ytd'],
+                  "High Volume" if customer_data['support_tickets_ytd'] > 100 else "Normal")
     
     with col4:
         st.metric("Expansion Prob.", f"{customer_data['expansion_probability']*100:.0f}%",
                   "High" if customer_data['expansion_probability'] > 0.7 else "Low")
+        st.metric("Days Since Contact", f"{customer_data['days_since_contact']:.0f}",
+                  "Overdue" if customer_data['days_since_contact'] > 30 else "Recent")
     
     # Main dashboard grid
     col1, col2 = st.columns([2, 1])
