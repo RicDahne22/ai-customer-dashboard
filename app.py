@@ -737,7 +737,8 @@ def main():
         st.markdown("---")
         st.subheader("CSM Breakdown")
         csm_counts = customers_df['csm'].value_counts()
-        for csm, count in csm_counts.items()[:4]:  # Show top 4 CSMs
+        for csm in csm_counts.head(4).index:  # Show top 4 CSMs
+            count = csm_counts[csm]
             health_avg = customers_df[customers_df['csm'] == csm]['health_score'].mean()
             st.markdown(f"**{csm}**: {count} accounts (avg: {health_avg:.0f})")
     
